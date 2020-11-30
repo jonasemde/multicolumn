@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace IchHabRecht\Multicolumn\ContextMenu;
 
 /*
@@ -12,8 +15,10 @@ namespace IchHabRecht\Multicolumn\ContextMenu;
  * LICENSE file that was distributed with this source code.
  */
 
+use IchHabRecht\Multicolumn\Utility\DatabaseUtility;
+use IchHabRecht\Multicolumn\Utility\MulticolumnUtility;
 use TYPO3\CMS\Backend\ContextMenu\ItemProviders\RecordProvider;
-use TYPO3\CMS\Lang\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageService;
 
 class ItemProvider extends RecordProvider
 {
@@ -33,11 +38,12 @@ class ItemProvider extends RecordProvider
         $languageService = $this->getLanguageService();
 
         $newItems = [];
-        $columns = \tx_multicolumn_db::getNumberOfColumnsFromContainer($this->record['uid'], $this->record);
+        $defaultLabel = $languageService->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:cm.pasteinto')
+            ?: $languageService->sL('LLL:EXT:lang/Resources/Private/Language/locallang_core.xlf:cm.pasteinto');
+        $columns = DatabaseUtility::getNumberOfColumnsFromContainer($this->record['uid'], $this->record);
         for ($i = 0; $i < $columns; $i++) {
             $newItems['multicolumn-pasteinto-' . $i] = [
-                'label' => $languageService->sL('LLL:EXT:lang/Resources/Private/Language/locallang_core.xlf:cm.pasteinto')
-                    . ' ' . $languageService->sL('LLL:EXT:multicolumn/locallang.xml:multicolumColumn.clickmenu')
+                'label' => $defaultLabel . ' ' . $languageService->sL('LLL:EXT:multicolumn/Resources/Private/Language/locallang.xlf:multicolumColumn.clickmenu')
                     . ' ' . ($i + 1),
                 'iconIdentifier' => 'actions-document-paste-into',
                 'callbackAction' => 'pasteIntoColumn',
@@ -84,7 +90,7 @@ class ItemProvider extends RecordProvider
 
         return [
             'data-callback-module' => 'TYPO3/CMS/Multicolumn/ContextMenuActions',
-            'data-colpos' => (\tx_multicolumn_div::colPosStart + $column),
+            'data-colpos' => (MulticolumnUtility::colPosStart + $column),
         ];
     }
 

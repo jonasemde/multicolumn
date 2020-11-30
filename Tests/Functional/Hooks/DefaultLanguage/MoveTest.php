@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace IchHabRecht\Multicolumn\Tests\Functional\Hooks\Translation;
+namespace IchHabRecht\Multicolumn\Tests\Functional\Hooks\DefaultLanguage;
 
 /*
  * This file is part of the TYPO3 Multicolumn project.
@@ -20,24 +20,24 @@ require_once __DIR__ . '/../../../FunctionalBaseTest.php';
 use IchHabRecht\Multicolumn\Tests\Functional\FunctionalBaseTest;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 
-class CopyTest extends FunctionalBaseTest
+class MoveTest extends FunctionalBaseTest
 {
     /**
-     * Copy a multicolumn container to another column
+     * Move a multicolumn container to another page
      *
      * @test
      */
-    public function copyContainerAndChildrenToOtherColumnInOtherLanguage()
+    public function moveContainerAndChildrenToOtherPageInDefaultLanguage()
     {
         $cmdMap = [
             FunctionalBaseTest::CONTENT_TABLE => [
                 1 => [
-                    'copy' => [
+                    'move' => [
                         'action' => 'paste',
-                        'target' => 1,
+                        'target' => 2,
                         'update' => [
-                            'colPos' => 2,
-                            'sys_language_uid' => 1,
+                            'colPos' => 0,
+                            'sys_language_uid' => 0,
                         ],
                     ],
                 ],
@@ -50,18 +50,14 @@ class CopyTest extends FunctionalBaseTest
 
         $this->assertNoProssesingErrorsInDataHandler($dataHandler);
 
-        $containerUid = $dataHandler->copyMappingArray[FunctionalBaseTest::CONTENT_TABLE][1];
-        $childUid = $dataHandler->copyMappingArray[FunctionalBaseTest::CONTENT_TABLE][2];
-
         $count = $this->getDatabaseConnection()->selectCount(
             '*',
             FunctionalBaseTest::CONTENT_TABLE,
-            'uid=' . $containerUid
-            . ' AND pid=1'
+            'uid=1'
+            . ' AND pid=2'
             . ' AND deleted=0'
             . ' AND CType=\'' . FunctionalBaseTest::CTYPE_MULTICOLUMN . '\''
-            . ' AND colPos=2'
-            . ' AND sys_language_uid=1'
+            . ' AND colPos=0'
             . ' AND tx_multicolumn_parentid=0'
         );
         $this->assertSame(1, $count);
@@ -69,13 +65,12 @@ class CopyTest extends FunctionalBaseTest
         $count = $this->getDatabaseConnection()->selectCount(
             '*',
             FunctionalBaseTest::CONTENT_TABLE,
-            'uid=' . $childUid
-            . ' AND pid=1'
+            'uid=2'
+            . ' AND pid=2'
             . ' AND deleted=0'
             . ' AND CType=\'' . FunctionalBaseTest::CTYPE_TEXTPIC . '\''
             . ' AND colPos=10'
-            . ' AND sys_language_uid=1'
-            . ' AND tx_multicolumn_parentid=' . $containerUid
+            . ' AND tx_multicolumn_parentid=1'
         );
         $this->assertSame(1, $count);
     }
